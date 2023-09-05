@@ -1,8 +1,10 @@
 import datetime
 import random
 
+
 def menu():
-    notas_ing = {}
+    notas_ing = {}   
+    notas_cancel  = {}
             
     while True:
         print("bienvenido al taller mecanico\n\n")
@@ -19,11 +21,11 @@ def menu():
         elif eleccion == '2':
             consultar_notas(notas_ing)
         elif eleccion == '3':
-            cancelar_nota(notas_ing)
+            notas_ing, notas_cancel = cancelar_nota(notas_ing, notas_cancel)
         elif eleccion == '4':
-            pass
+            notas_ing, notas_cancel = recuperar_nota(notas_ing, notas_cancel)
         elif eleccion == '5':
-            pass
+            break
         else:
             print('Por favor, sólo las opciones disponibles')
 
@@ -139,31 +141,48 @@ def consultar_notas(notas_ing):
     else:
         input('Presione Enter para regresar al menú\n')
 
-def cancelar_nota(notas_ing):
 
+def cancelar_nota(notas_ing, notas_cancel):
+    folio = int(input("Por favor, proporcione el folio de la nota que desea cancelar: "))
+    if folio in notas_ing:
+        datos_g = notas_ing.pop(folio)
+        notas_cancel[folio] = datos_g
+        print("\nDetalles de la nota cancelada:")
+        print(f"Folio: {datos_g[0]}")
+        print(f"Fecha: {datos_g[1]}")
+        print(f"Cliente: {datos_g[2]}")
+        print(f"Monto total: {datos_g[3]}")
+        confirmacion = input("¿Está seguro de que desea cancelar esta nota? (Sí/No): ").lower()
+        if confirmacion == "si":
+           print("Nota cancelada con éxito.")
+        else:
+            notas_ing[folio] = datos_g  # Si la cancelación se cancela, restauramos la nota en las notas ingresadas
+            del notas_cancel[folio]
+            print("La cancelación de la nota ha sido cancelada.")
+    else:
+        print("El folio de la nota especificada no existe o corresponde a una nota cancelada.")
 
-    folio2 = input("Ingrese el folio de la nota que desea cancelar: ")
-    for nota in notas_ing:
-            if nota == folio2 and not nota["cancelada"]:
-                print("\nDetalles de la nota:")
-                print(f"Folio: {nota['folio']}")
-                print(f"Fecha: {nota['fecha']}")
-                print(f"Cliente: {nota['cliente']}")
-                print("Detalle de servicios:")
-                for servicio in nota["detalle"]:
-                    print(f"- {servicio['nombre_servicio']}: ${servicio['costo_servicio']:.2f}")
-                print(f"Monto total: ${nota['monto_total']:.2f}")
+    return notas_ing, notas_cancel
 
-                confirmacion = input("¿Está seguro de que desea cancelar esta nota? (Sí/No): ").lower()
-                if confirmacion == 'si':
-                    nota["cancelada"] = True
-                    print(f"Nota con folio {folio2} cancelada con éxito.")
-                else:
-                    print("La cancelación de la nota ha sido cancelada.")
-                break
-            else:
-                print("El folio de nota especificado no existe o corresponde a una nota cancelada.")
+def recuperar_nota(notas_ing, notas_cancel):
+    print("Notas canceladas:")
+    print("Folio | Fecha | Cliente | Monto Total")
+    
+    for folio, datos in notas_cancel.items():
+        print(f"{folio} | {datos[0]} | {datos[1]} | {datos[3]}")
+    
+    folio_a_recuperar = int(input("Indique el folio de la nota que desea recuperar (o 0 para volver al menú principal): "))
+    
+    if folio_a_recuperar == 0:
+        return notas_ing, notas_cancel  # Volver al menú principal sin cambios en las notas canceladas
+    
+    if folio_a_recuperar in notas_cancel:
+        datos_g = notas_cancel.pop(folio_a_recuperar)
+        notas_ing[folio_a_recuperar] = datos_g
+        print("Nota recuperada con éxito.")
+    else:
+        print("El folio de nota especificado no existe o corresponde a una nota no cancelada.")
 
-    nota_cancelada = []
+    return notas_ing, notas_cancel
 
 menu()
