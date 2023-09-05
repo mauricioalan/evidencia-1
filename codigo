@@ -1,0 +1,169 @@
+import datetime
+import random
+
+def menu():
+    notas_ing = {}
+            
+    while True:
+        print("bienvenido al taller mecanico\n\n")
+
+        print("1. Registrar una nota")
+        print("2. Consultas y reportes")
+        print("3. Cancelar una nota")
+        print("4. Recuperar una nota")
+        print("5. Salir")
+        eleccion = input('\nElija una opción (con un numero del 1 al 5): ')
+
+        if eleccion == '1':
+            notas_ing = registrar_nota(notas_ing)
+        elif eleccion == '2':
+            consultar_notas(notas_ing)
+        elif eleccion == '3':
+            cancelar_nota(notas_ing)
+        elif eleccion == '4':
+            pass
+        elif eleccion == '5':
+            pass
+        else:
+            print('Por favor, sólo las opciones disponibles')
+
+def registrar_nota(notas_ing):
+    servicios = []
+
+
+    try:
+        fecha = input('Ingrese la fecha (dd/mm/aaaa): ')
+        fecha = datetime.datetime.strptime(fecha,"%d/%m/%Y").date()
+    except ValueError:
+        print("por favor, ingresa el formato corresondiente")
+
+    nombre=input("ingresa tu nombre: ")
+
+    try:
+        serv_str=int(input(f"bienvenido {nombre} ¿cuantos servicios necesitas?: "))
+    except ValueError:
+        print("porfavor ingresa los servicios que necesitas: ")
+
+
+    for i in range(serv_str):
+        nombre_servicio = input(f"Ingresa el nombre del servicio {i+1}: ")
+
+        while True:
+            try:
+                costo_serv = float(input(f"Ingresa el costo del servicio {nombre_servicio}: "))
+                break
+            except ValueError:
+                print("Por favor, ingresa un costo válido.")
+                
+        servicios.append((nombre_servicio, costo_serv))
+
+    monto_total = sum(costo for _, costo in servicios)
+
+    num_folio = []
+
+    numero_azar = random.randint(1000, 9999)
+    num_folio.append(numero_azar)
+    
+    folio = max(num_folio)
+
+    print(f"Nota de folio {folio}")
+    print(f"fecha:{fecha}")
+    print(f"cliente:{nombre}")
+    print("Servicios:")
+    for servicio, costo in servicios:
+        print(f"- {servicio}: ${costo}")
+    print(f"Costo total: ${monto_total}")
+
+    datos_de_nota = (fecha, nombre, servicios, monto_total)
+
+    notas_ing[folio] = datos_de_nota
+
+    return notas_ing
+
+def consultar_notas(notas_ing):
+    print("Consultas")
+    print("1. Consulta por periodo")
+    print("2. Consulta por folio")
+    print("3. Volver al menu principal")
+
+    while True:
+        try:
+            consulta = int(input('Elija una opción (con un numero del 1 al 3): '))
+            
+        except ValueError:
+            print ("Por favor, ingresa un dato valido")
+        else:
+                if consulta > 0 and consulta <= 3:
+                    break
+                else:
+                    print('Por favor, sólo las opciones disponibles')
+
+    if consulta == 1:
+        notas_encontradas = []
+        fecha_inicial = input("podrias darme la fecha inicial(en formato dd/mm/aaaa): ")
+        fecha_inicial = datetime.datetime.strptime(fecha_inicial,"%d/%m/%Y").date()
+        fecha_final = input("podrias darme la fecha final (en formato dd/mm/aaaa): ")
+        fecha_final = datetime.datetime.strptime(fecha_final,"%d/%m/%Y").date()
+
+        for folio, datos in notas_ing.items():
+            fecha = datos[0]
+            if fecha >= fecha_inicial and fecha <=fecha_final:
+                datos_encontrados = [folio, fecha, datos[1], datos[3]]
+                notas_encontradas.append(datos_encontrados)
+        
+        for nota in notas_encontradas:
+            print(f'\nFolio: {nota[0]}')
+            print(f'Fecha: {nota[1]}')
+            print(f'Nombre: {nota[2]}')
+            print(f'Monto total: {nota[3]}\n')
+        input('Presione Enter para continuar\n') 
+
+    elif consulta == 2:
+        
+        try:
+            folio = int(input('podrías darme el folio que quieres consultar: '))
+        except ValueError:
+            print('Ese no es un folio válido. Intenta de nuevo\n')
+        else:
+            if folio in notas_ing.keys():
+                print(f'Folio: {folio}')
+                print(f'Fecha: {notas_ing[folio][0]}')
+                print(f'Nombre: {notas_ing[folio][1]}')
+                print(f'Detalle: {notas_ing[folio][2]}')
+                print(f'Monto total: {notas_ing[folio][3]}')
+            else:
+                print("La nota no se encuentra en el sistema\n")
+
+        input('Presione Enter para continuar\n')
+
+    else:
+        input('Presione Enter para regresar al menú\n')
+
+def cancelar_nota(notas_ing):
+
+
+    folio2 = input("Ingrese el folio de la nota que desea cancelar: ")
+    for nota in notas_ing:
+            if nota == folio2 and not nota["cancelada"]:
+                print("\nDetalles de la nota:")
+                print(f"Folio: {nota['folio']}")
+                print(f"Fecha: {nota['fecha']}")
+                print(f"Cliente: {nota['cliente']}")
+                print("Detalle de servicios:")
+                for servicio in nota["detalle"]:
+                    print(f"- {servicio['nombre_servicio']}: ${servicio['costo_servicio']:.2f}")
+                print(f"Monto total: ${nota['monto_total']:.2f}")
+
+                confirmacion = input("¿Está seguro de que desea cancelar esta nota? (Sí/No): ").lower()
+                if confirmacion == 'si':
+                    nota["cancelada"] = True
+                    print(f"Nota con folio {folio2} cancelada con éxito.")
+                else:
+                    print("La cancelación de la nota ha sido cancelada.")
+                break
+            else:
+                print("El folio de nota especificado no existe o corresponde a una nota cancelada.")
+
+    nota_cancelada = []
+
+menu()
